@@ -204,6 +204,34 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		}
 
 		/**
+ 		* Get repository URL from download link.
+ 		* 
+ 		* Extracts owner and repository name from GitHub API download URL
+ 		* to create the repository URL.
+ 		* 
+ 		* @access private
+ 		* 
+ 		* @return string Repository URL or empty string if not available.
+ 		*/
+		 private function get_repo_url() {
+			if ( !isset( $this->api_data->download_link ) ) {
+				return '';
+			}
+		
+			$path = parse_url( $this->api_data->download_link, PHP_URL_PATH );
+			$path_parts = explode( '/', trim( $path, '/' ) );
+			
+			if ( count( $path_parts ) >= 4 && $path_parts[0] === 'repos' ) {
+				$owner = $path_parts[1];
+				$repo = $path_parts[2];
+
+				return "https://github.com/{$owner}/{$repo}";
+			}
+		
+			return '';
+		}
+
+		/**
 		 * Hook into site_transient_update_{plugins|themes} to update from GitHub.
 		 *
 		 * @param \stdClass $transient Plugin|Theme update transient.
@@ -226,6 +254,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				'update-supported'    => true,
 				'requires'            => $this->api_data->requires,
 				'requires_php'        => $this->api_data->requires_php,
+				'url' 				  => $this->get_repo_url(),
 			);
 
 			if ( version_compare( $this->api_data->version, $this->local_version, '>' ) ) {
