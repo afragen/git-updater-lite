@@ -254,7 +254,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				'update-supported'    => true,
 				'requires'            => $this->api_data->requires,
 				'requires_php'        => $this->api_data->requires_php,
-				'url' 				  => $this->get_repo_url(),
+				'url'                 => $this->get_repo_url(),
 			);
 
 			if ( version_compare( $this->api_data->version, $this->local_version, '>' ) ) {
