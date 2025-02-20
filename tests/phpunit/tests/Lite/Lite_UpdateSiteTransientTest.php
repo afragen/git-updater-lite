@@ -342,23 +342,25 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_should_add_plugin_response_to_no_update_when_no_update_is_available( $property_name, $expected ) {
 		$api_data = (object) array(
-			'slug'         => 'test-plugin-slug',
-			'file'         => 'my-plugin/my-plugin.php',
-			'type'         => 'plugin',
-			'url'          => 'http://example.org',
-			'version'      => '0.0.1',
-			'icons'        => (object) array(
+			'slug'          => 'test-plugin-slug',
+			'file'          => 'my-plugin/my-plugin.php',
+			'type'          => 'plugin',
+			'url'           => 'http://example.org',
+			'version'       => '0.0.1',
+			'icons'         => (object) array(
 				'1x' => 'icon-1x.png',
 				'2x' => 'icon-2x.png',
 			),
-			'banners'      => (object) array(
+			'banners'       => (object) array(
 				'low'  => 'banner-low.png',
 				'high' => 'banner-high.png',
 			),
-			'branch'       => 'test-branch',
-			'git'          => 'test-githost',
-			'requires'     => 'test-version',
-			'requires_php' => 'test-php-version',
+			'branch'        => 'test-branch',
+			'git'           => 'test-githost',
+			'requires'      => 'test-version',
+			'requires_php'  => 'test-php-version',
+			'download_link' => 'test-download-link',
+			'tested'        => '10.0.0',
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
@@ -477,6 +479,14 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 				'property_name' => 'requires_php',
 				'expected'      => 'requires_php',
 			),
+			'package'          => array(
+				'property_name' => 'package',
+				'expected'      => 'test-download-link',
+			),
+			'tested'           => array(
+				'property_name' => 'tested',
+				'expected'      => '10.0.0',
+			),
 		);
 	}
 
@@ -507,6 +517,8 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 			'git'          => 'test-githost',
 			'requires'     => 'test-version',
 			'requires_php' => 'test-php-version',
+			'package'      => 'test-download-link',
+			'tested'       => '10.0.0',
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['theme'] );
@@ -625,6 +637,14 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 				'key_name' => 'requires_php',
 				'expected' => 'requires_php',
 			),
+			'package'          => array(
+				'property_name' => 'package',
+				'expected'      => 'test-download-link',
+			),
+			'tested'           => array(
+				'property_name' => 'tested',
+				'expected'      => '10.0.0',
+			),
 		);
 	}
 
@@ -654,6 +674,8 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 			'git'          => 'test-githost',
 			'requires'     => 'test-version',
 			'requires_php' => 'test-php-version',
+			'package'      => 'test-download-link',
+			'tested'       => '10.0.0',
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
