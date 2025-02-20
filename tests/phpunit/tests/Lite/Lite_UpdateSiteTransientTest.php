@@ -481,11 +481,11 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 			),
 			'package'          => array(
 				'property_name' => 'package',
-				'expected'      => 'test-download-link',
+				'expected'      => 'package',
 			),
 			'tested'           => array(
 				'property_name' => 'tested',
-				'expected'      => '10.0.0',
+				'expected'      => 'tested',
 			),
 		);
 	}
@@ -639,11 +639,11 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 			),
 			'package'          => array(
 				'property_name' => 'package',
-				'expected'      => 'test-download-link',
+				'expected'      => 'package',
 			),
 			'tested'           => array(
 				'property_name' => 'tested',
-				'expected'      => '10.0.0',
+				'expected'      => 'tested',
 			),
 		);
 	}
