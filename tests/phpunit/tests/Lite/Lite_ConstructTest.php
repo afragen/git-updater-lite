@@ -111,33 +111,22 @@ class Lite_ConstructTest extends GitUpdater_UnitTestCase {
 	}
 
 	/**
-	 * Tests that the 'update_server' property is set.
+	 * Tests that the 'update_server' property is set to a URL.
 	 *
 	 * @dataProvider data_file_paths_and_servers
 	 *
-	 * @param string          $file_path The file path.
-	 * @param string|WP_Error $expected   The expected server, or WP_Error object.
+	 * @covers \Fragen\Git_Updater\Lite::check_update_uri
+	 *
+	 * @param string $file_path The file path.
+	 * @param string $expected  The expected URL.
 	 */
-	public function test_should_set_update_server_property( $file_path, $expected ) {
+	public function test_should_set_update_server_property_to_url( $file_path, $expected ) {
 		$actual = $this->get_property_value( new \Fragen\Git_Updater\Lite( $file_path ), 'update_server' );
-		if ( $expected instanceof WP_Error ) {
-			$this->assertWPError(
-				$actual,
-				'The update_server property was not set to a WP_Error object .'
-			);
-
-			$this->assertSame(
-				$expected->get_error_code(),
-				'invalid_header_data',
-				"The update_server property's error code is incorrect."
-			);
-		} else {
-			$this->assertSame(
-				$expected,
-				$actual,
-				'The update_server property was not set to the expected value.'
-			);
-		}
+		$this->assertSame(
+			$expected,
+			$actual,
+			'The update_server property was not set to the expected value.'
+		);
 	}
 
 	/**
@@ -147,21 +136,59 @@ class Lite_ConstructTest extends GitUpdater_UnitTestCase {
 	 */
 	public function data_file_paths_and_servers() {
 		return array(
-			'a theme'                        => array(
+			'a theme'  => array(
 				'file_path' => $this->test_files['theme'],
 				'expected'  => 'https://my-theme.com',
 			),
-			'a plugin'                       => array(
+			'a plugin' => array(
 				'file_path' => $this->test_files['plugin'],
 				'expected'  => 'https://my-plugin.com',
 			),
-			'a theme with no update server'  => array(
+		);
+	}
+
+	/**
+	 * Tests that the 'update_server' property is set to a WP_Error object
+	 * for invalid server values.
+	 *
+	 * @dataProvider data_file_paths_with_no_server
+	 *
+	 * @covers \Fragen\Git_Updater\Lite::check_update_uri
+	 *
+	 * @param string $file_path The file path.
+	 */
+	public function test_should_set_update_server_property_to_wp_error( $file_path ) {
+		$actual = $this->get_property_value( new \Fragen\Git_Updater\Lite( $file_path ), 'update_server' );
+		$this->assertWPError(
+			$actual,
+			'The update_server property was not set to a WP_Error object .'
+		);
+
+		$this->assertSame(
+			$actual->get_error_code(),
+			'invalid_header_data',
+			"The update_server property's error code is incorrect."
+		);
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array[]
+	 */
+	public function data_file_paths_with_no_server() {
+		return array(
+			'a theme with no update server'           => array(
 				'file_path' => $this->test_files['theme_no_server'],
-				'expected'  => new WP_Error( 'invalid_header_data' ),
 			),
-			'a plugin with no update server' => array(
+			'a plugin with no update server'          => array(
 				'file_path' => $this->test_files['plugin_no_server'],
-				'expected'  => new WP_Error( 'invalid_header_data' ),
+			),
+			'a theme with a server which has a path'  => array(
+				'file_path' => $this->test_files['theme_server_with_path'],
+			),
+			'a plugin with a server which has a path' => array(
+				'file_path' => $this->test_files['plugin_server_with_path'],
 			),
 		);
 	}
