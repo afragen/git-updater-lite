@@ -175,6 +175,25 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 	}
 
 	/**
+	 * Tests that null is returned when the 'pagenow' global is not set and
+	 * the 'PHP_SELF' server variable is set to a disallowed page.
+	 */
+	public function test_should_return_null_when_pagenow_global_is_not_set_and_phpself_server_variable_is_a_disallowed_page() {
+		unset( $GLOBALS['pagenow'] );
+		$_SERVER['PHP_SELF'] = 'edit.php';
+
+		$this->assertNull( ( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run() );
+	}
+
+	/**
+	 * Tests that null is returned when the 'pagenow' global and 'PHP_SELF' server variable are not set.
+	 */
+	public function test_should_return_null_when_pagenow_global_and_phpself_server_variable_are_not_set() {
+		unset( $GLOBALS['pagenow'], $_SERVER['PHP_SELF'] );
+		$this->assertNull( ( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run() );
+	}
+
+	/**
 	 * Tests that null is returned when no error occurs.
 	 *
 	 * @dataProvider data_allowed_pages
@@ -240,6 +259,40 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_should_set_transient_when_no_error_occurs() {
 		$GLOBALS['pagenow'] = 'update-core.php';
+
+		$response = '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}';
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array( 'body' => $response )
+		);
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$lite->run();
+
+		$file      = $this->get_property_value( $lite, 'file' );
+		$api_data  = $this->get_property_value( $lite, 'api_data' );
+		$transient = get_site_transient( "git-updater-lite_{$file}" );
+
+		$this->assertInstanceOf(
+			get_class( $api_data ),
+			$transient,
+			'The transient is not the expected type.'
+		);
+
+		$this->assertSame(
+			(array) $api_data,
+			(array) $transient,
+			'The "api_data" and transient values not match.'
+		);
+	}
+
+	/**
+	 * Tests that the transient is set when the 'pagenow' global is not set
+	 * but the 'PHP_SELF' server variable matches an allowed page.
+	 */
+	public function test_should_set_transient_when_pagenow_global_is_not_set_but_phpself_server_variable_is_allowed() {
+		unset( $GLOBALS['pagenow'] );
+		$_SERVER['PHP_SELF'] = 'update-core.php';
 
 		$response = '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}';
 		$this->filter_http_request(
