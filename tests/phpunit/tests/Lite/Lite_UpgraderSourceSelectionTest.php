@@ -12,6 +12,21 @@
  */
 class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 	/**
+	 * Tests that a TypeError is thrown when the 'upgrader' argument is not
+	 * of the correct type.
+	 */
+	public function test_should_throw_typeerror_for_invalid_upgrader_argument_type() {
+		$this->expectException( TypeError::class );
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$lite->upgrader_source_selection(
+			'source',
+			'remote-source',
+			new stdClass()
+		);
+	}
+
+	/**
 	 * Tests that the original source is returned when installing.
 	 */
 	public function test_should_return_original_source_when_installing() {
