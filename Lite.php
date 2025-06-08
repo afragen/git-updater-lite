@@ -114,7 +114,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			}
 			$url      = add_query_arg(
 				array( 'slug', this->slug ),
-				sprintf( '%s/git-updater/v1/update-api/', $this->update_server )
+				sprintf( '%s/wp-json/git-updater/v1/update-api/', $this->update_server )
 			);
 			$response = get_site_transient( "git-updater-lite_{$this->file}" );
 			if ( ! $response ) {
