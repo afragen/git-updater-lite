@@ -32,6 +32,7 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 require $_tests_dir . '/includes/bootstrap.php';
 
 require __DIR__ . '/includes/Mock_Filesystem.php';
+require __DIR__ . '/includes/Mock_WP_Upgrader.php';
 require __DIR__ . '/includes/Mock_Plugin_Upgrader.php';
 require __DIR__ . '/includes/Mock_Theme_Upgrader.php';
 require __DIR__ . '/includes/GitUpdater_UnitTestCase.php';
