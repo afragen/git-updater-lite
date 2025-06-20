@@ -201,7 +201,6 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				return $source;
 			}
 
-			// TODO: add type hint for $upgrader, PHP 8 minimum due to `|`.
 			if ( ! $upgrader instanceof Plugin_Upgrader && ! $upgrader instanceof Theme_Upgrader ) {
 				throw new TypeError( __METHOD__ . '(): Argument #3 ($upgrader) must be of type Plugin_Upgrader|Theme_Upgrader, ' . esc_attr( gettype( $upgrader ) ) . ' given.' );
 			}
