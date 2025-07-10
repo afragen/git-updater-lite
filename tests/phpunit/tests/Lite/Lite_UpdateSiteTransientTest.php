@@ -529,7 +529,7 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 		);
 
 		$this->assertIsArray(
-			$actual->no_update[ $api_data->slug],
+			$actual->no_update[ $api_data->slug ],
 			"The transient's response value is not an array."
 		);
 
