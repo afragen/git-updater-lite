@@ -525,7 +525,7 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 		$this->assertArrayHasKey(
 			$api_data->slug,
 			$actual->no_update,
-			"The transient's no_update value does not have a '{$api_data->file}' key."
+			"The transient's no_update value does not have a '{$api_data->slug}' key."
 		);
 
 		$this->assertIsArray(
