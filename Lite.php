@@ -286,15 +286,14 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				$response['theme_uri'] = $response['url'];
 			}
 
+			$key      = 'plugin' === $this->api_data->type ? $this->api_data->file : $this->api_data->slug;
+			$response = 'plugin' === $this->api_data->type ? (object) $response : $response;
+
 			if ( version_compare( $this->api_data->version, $this->local_version, '>' ) ) {
-				$response                    = 'plugin' === $this->api_data->type ? (object) $response : $response;
-				$key                         = 'plugin' === $this->api_data->type ? $this->api_data->file : $this->api_data->slug;
 				$transient->response[ $key ] = $response;
 			} else {
-				$response = 'plugin' === $this->api_data->type ? (object) $response : $response;
-
 				// Add repo without update to $transient->no_update for 'View details' link.
-				$transient->no_update[ $this->api_data->file ] = $response;
+				$transient->no_update[ $key ] = $response;
 			}
 
 			return $transient;
