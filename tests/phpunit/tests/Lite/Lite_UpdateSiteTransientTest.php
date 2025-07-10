@@ -523,25 +523,25 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 		);
 
 		$this->assertArrayHasKey(
-			$api_data->file,
+			$api_data->slug,
 			$actual->no_update,
 			"The transient's no_update value does not have a '{$api_data->file}' key."
 		);
 
 		$this->assertIsArray(
-			$actual->no_update[ $api_data->file ],
+			$actual->no_update[ $api_data->slug],
 			"The transient's response value is not an array."
 		);
 
 		$this->assertArrayHasKey(
 			$key_name,
-			$actual->no_update[ $api_data->file ],
+			$actual->no_update[ $api_data->slug ],
 			"The transient's response value does not have a '{$key_name}' key."
 		);
 
 		$this->assertSame(
 			$expected,
-			$actual->no_update[ $api_data->file ][ $key_name ],
+			$actual->no_update[ $api_data->slug ][ $key_name ],
 			"The transient's response value for {$key_name} is incorrect."
 		);
 	}
