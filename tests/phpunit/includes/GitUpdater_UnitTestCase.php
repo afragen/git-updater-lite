@@ -11,12 +11,13 @@ abstract class GitUpdater_UnitTestCase extends WP_UnitTestCase {
 	 * @var array
 	 */
 	protected $test_files = array(
-		'plugin'                  => __DIR__ . '/../data/plugins/my-plugin/my-plugin.php',
-		'plugin_no_server'        => __DIR__ . '/../data/plugins/my-plugin-no-server/my-plugin-no-server.php',
-		'plugin_server_with_path' => __DIR__ . '/../data/plugins/my-plugin-server-with-path/my-plugin-server-with-path.php',
-		'theme'                   => __DIR__ . '/../data/themes/my-theme/functions.php',
-		'theme_no_server'         => __DIR__ . '/../data/themes/my-theme-no-server/functions.php',
-		'theme_server_with_path'  => __DIR__ . '/../data/themes/my-theme-server-with-path/functions.php',
+		'plugin'                              => __DIR__ . '/../data/plugins/my-plugin/my-plugin.php',
+		'plugin_no_server'                    => __DIR__ . '/../data/plugins/my-plugin-no-server/my-plugin-no-server.php',
+		'plugin_server_with_path'             => __DIR__ . '/../data/plugins/my-plugin-server-with-path/my-plugin-server-with-path.php',
+		'a plugin_server_with_trailing_slash' => __DIR__ . '/../data/plugins/my-plugin-server-with-trailing-slash/my-plugin-server-with-trailing-slash.php',
+		'theme'                               => __DIR__ . '/../data/themes/my-theme/functions.php',
+		'theme_no_server'                     => __DIR__ . '/../data/themes/my-theme-no-server/functions.php',
+		'theme_server_with_path'              => __DIR__ . '/../data/themes/my-theme-server-with-path/functions.php',
 	);
 
 	/**
