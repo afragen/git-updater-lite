@@ -144,6 +144,10 @@ class Lite_ConstructTest extends GitUpdater_UnitTestCase {
 				'file_path' => $this->test_files['plugin'],
 				'expected'  => 'https://my-plugin.com',
 			),
+			'a plugin with a server which has a trailing slash' => array(
+				'file_path' => $this->test_files['plugin_server_with_trailing_slash'],
+				'expected'  => 'https://my-plugin.com',
+			),
 		);
 	}
 
@@ -189,9 +193,6 @@ class Lite_ConstructTest extends GitUpdater_UnitTestCase {
 			),
 			'a plugin with a server which has a path' => array(
 				'file_path' => $this->test_files['plugin_server_with_path'],
-			),
-			'a plugin with a server which has a trailing slash' => array(
-				'file_path' => $this->test_files['plugin_server_with_trailing_slash'],
 			),
 		);
 	}
