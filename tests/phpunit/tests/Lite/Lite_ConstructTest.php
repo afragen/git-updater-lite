@@ -74,6 +74,10 @@ class Lite_ConstructTest extends GitUpdater_UnitTestCase {
 				'file_path' => $this->test_files['plugin'],
 				'file'      => 'my-plugin/my-plugin.php',
 			),
+			'a plugin with a server which has a trailing slash' => array(
+				'file_path' => $this->test_files['plugin_server_with_trailing_slash'],
+				'file'      => 'my-plugin-server-with-trailing-slash/my-plugin-server-with-trailing-slash.php',
+			),
 		);
 	}
 
