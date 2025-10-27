@@ -79,11 +79,10 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 * @return string|WP_Error
 		 */
 		private function check_update_uri( $updateUri ) {
-			if ( filter_var( $updateUri, FILTER_VALIDATE_URL )
-				&& null === parse_url( $updateUri, PHP_URL_PATH ) // null means no path is present.
+			$updateUri = untrailingslashit( trim( $updateUri ) );
+			if ( ! ( filter_var( $updateUri, FILTER_VALIDATE_URL )
+				&& null === parse_url( $updateUri, PHP_URL_PATH ) ) // null means no path is present.
 			) {
-				$updateUri = untrailingslashit( trim( $updateUri ) );
-			} else {
 				return new WP_Error( 'invalid_header_data', 'Invalid data from Update URI header', $updateUri );
 			}
 
