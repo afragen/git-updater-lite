@@ -1,7 +1,7 @@
 {
 	"name": "afragen/git-updater-lite",
 	"description": "A simple class to integrate with Git Updater for standalone plugin/theme updates.",
-	"version": "2.9.0",
+	"version": "2.5.0",
 	"type": "library",
 	"keywords": [
 		"wordpress",
