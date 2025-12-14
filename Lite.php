@@ -135,15 +135,9 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				}
 				$this->api_data->file = $this->file;
 
-				/*
-				* Set transient for 5 minutes as AWS sets 5 minute timeout
-				* for release asset redirect.
-				*
-				* Set limited timeout so wp_remote_get() not hit as frequently.
-				* wp_remote_get() for plugin/theme check can run on every pageload
-				* for certain pages.
-				*/
-				set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, 5 * MINUTE_IN_SECONDS );
+				// Set timeout for transient via filter.
+				$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->api_data );
+				set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, $timeout );
 			} else {
 				if ( property_exists( $response, 'error' ) ) {
 					return new WP_Error( 'repo-no-exist', 'Specified repo does not exist' );
