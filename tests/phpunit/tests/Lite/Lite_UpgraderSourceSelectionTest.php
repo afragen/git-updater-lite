@@ -116,4 +116,23 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 
 		$this->assertSame( $call_count + 1, $wp_filesystem->get_call_count( 'move' ) );
 	}
+
+	/**
+	 * Tests that the original error is returned if present.
+	 */
+	public function test_should_return_original_error_if_present() {
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+
+		$error = new WP_Error( 'some_error_code', 'Some error message.' );
+
+		$this->assertSame(
+			$error,
+			$lite->upgrader_source_selection(
+				$error,
+				'remote-source',
+				new Plugin_Upgrader(),
+				array( 'plugin' => 'my-plugin/my-plugin.php' )
+			)
+		);
+	}
 }
