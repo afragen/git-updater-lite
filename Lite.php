@@ -125,7 +125,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			$response = get_site_transient( "git-updater-lite_{$this->file}" );
 			if ( ! $response ) {
 				/* Apply filter to API URL.
-				 * Add `beta-rc` query arg to URL to get pre-release versions.
+				 * Example, add `development` query arg to URL to get pre-release versions.
 				 *
 				 * @param string $url The API URL.
 				 * @param string $slug The plugin/theme slug
