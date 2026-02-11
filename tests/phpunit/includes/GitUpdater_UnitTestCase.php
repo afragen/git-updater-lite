@@ -29,9 +29,9 @@ abstract class GitUpdater_UnitTestCase extends WP_UnitTestCase {
 	 */
 	protected function get_property_value( $obj, $name ) {
 		$reflected = new ReflectionProperty( $obj, $name );
-		$reflected->setAccessible( true );
+		( PHP_VERSION_ID < 80100 ) && $reflected->setAccessible( true );
 		$value = $reflected->getValue( $obj );
-		$reflected->setAccessible( false );
+		( PHP_VERSION_ID < 80100 ) && $reflected->setAccessible( false );
 		return $value;
 	}
 
@@ -44,9 +44,9 @@ abstract class GitUpdater_UnitTestCase extends WP_UnitTestCase {
 	 */
 	protected function set_property_value( $obj, $name, $value ) {
 		$reflected = new ReflectionProperty( $obj, $name );
-		$reflected->setAccessible( true );
+		( PHP_VERSION_ID < 80100 ) && $reflected->setAccessible( true );
 		$reflected->setValue( $obj, $value );
-		$reflected->setAccessible( false );
+		( PHP_VERSION_ID < 80100 ) && $reflected->setAccessible( false );
 	}
 
 		/**
