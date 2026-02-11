@@ -19,7 +19,7 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin' ) );
 		$lite->load_hooks();
 
-		$this->assertIsInt( has_filter( 'upgrader_source_selection', array( $lite, 'upgrader_source_selection' ) ) );
+		$this->assertIsInt( has_filter( 'upgrader_source_selection', array( get_class($lite), 'upgrader_source_selection' ) ) );
 	}
 
 	/**
