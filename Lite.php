@@ -161,7 +161,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 * @return void
 		 */
 		public function load_hooks() {
-			$type = $this->api_data->type;
+			add_filter( 'upgrader_source_selection', array( __CLASS__, 'upgrader_source_selection' ), 10, 4 );
 			add_filter( 'plugins_api', array( $this, 'plugin_api_details' ), 99, 3 );
 			add_filter( 'themes_api', array( $this, 'theme_api_details' ), 99, 3 );
 			add_filter( 'site_transient_update_plugins', array( $this, 'update_site_transient' ), 20, 1 );
@@ -192,7 +192,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 *
 		 * @return string|WP_Error
 		 */
-		public function upgrader_source_selection( $source, string $remote_source, WP_Upgrader $upgrader, $hook_extra = null ) {
+		public static function upgrader_source_selection( $source, string $remote_source, WP_Upgrader $upgrader, $hook_extra = null ) {
 			global $wp_filesystem;
 
 			// Exit early for errors.
@@ -362,9 +362,9 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			}
 
 			if ( ! empty( $prepared_themes[ $theme->slug ]['hasUpdate'] ) ) {
-				$prepared_themes[ $theme->slug ]['update'] = $this->append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->slug ]['update'] = self::append_theme_actions_content( $theme );
 			} else {
-				$prepared_themes[ $theme->slug ]['description'] .= $this->append_theme_actions_content( $theme );
+				$prepared_themes[ $theme->slug ]['description'] .= self::append_theme_actions_content( $theme );
 			}
 
 			return $prepared_themes;
@@ -382,7 +382,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 *
 		 * @return string (content buffer)
 		 */
-		protected function append_theme_actions_content( $theme ) {
+		protected static function append_theme_actions_content( $theme ) {
 			$details_url       = esc_attr(
 				add_query_arg(
 					array(
