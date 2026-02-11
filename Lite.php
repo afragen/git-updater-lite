@@ -124,13 +124,14 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			);
 			$response = get_site_transient( "git-updater-lite_{$this->file}" );
 			if ( ! $response ) {
-				/* Apply filter to API URL.
-				 * Example, add `channel=development` query arg to URL to get pre-release versions.
+				/*
+				 * Apply filter to API URL.
+				 * Example, add `development` query arg to URL to get pre-release versions.
 				 *
 				 * @param string $url The API URL.
 				 * @param string $slug The plugin/theme slug
 				 */
-				$url = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
+				$url      = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
 				$response = wp_remote_get( $url );
 				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) === 404 ) {
 					return $response;
