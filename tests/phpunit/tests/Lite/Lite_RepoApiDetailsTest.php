@@ -6,9 +6,10 @@
  */
 
 /**
- * Tests for Lite::repo_api_details()
+ * Tests for Lite::plugin_api_details() and Lite::theme_api_details()
  *
- * @covers \Fragen\Git_Updater\Lite::repo_api_details
+ * @covers \Fragen\Git_Updater\Lite::plugin_api_details
+ * @covers \Fragen\Git_Updater\Lite::theme_api_details
  */
 class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 	/**
@@ -25,7 +26,10 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => $type ) );
 
 		$this->assertTrue(
-			$lite->repo_api_details( true, $action, (object) array( 'test' => 'response' ) )
+			$lite->plugin_api_details( true, $action, (object) array( 'test' => 'response' ) )
+		);
+		$this->assertTrue(
+			$lite->theme_api_details( true, $action, (object) array( 'test' => 'response' ) )
 		);
 	}
 
@@ -87,7 +91,7 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 		);
 
 		$this->assertTrue(
-			$lite->repo_api_details( true, 'plugin_information', (object) array( 'slug' => 'not-my-plugin' ) )
+			$lite->plugin_api_details( true, 'plugin_information', (object) array( 'slug' => 'not-my-plugin' ) )
 		);
 	}
 
@@ -110,8 +114,13 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 
 		$this->assertSame(
 			$api_data,
-			$lite->repo_api_details( true, "{$type}_information", (object) array( 'slug' => "my-{$type}" ) )
+			$lite->plugin_api_details( true, 'plugin_information', (object) array( 'slug' => "my-{$type}" ) )
 		);
+		$this->assertSame(
+			$api_data,
+			$lite->theme_api_details( true, 'theme_information', (object) array( 'slug' => "my-{$type}" ) )
+		);
+
 	}
 
 	/**

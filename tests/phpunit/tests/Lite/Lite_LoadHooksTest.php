@@ -23,7 +23,7 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 	}
 
 	/**
-	 * Tests that '{$type}s_api' is filtered.
+	 * Tests that 'plugins_api|themes_api' is filtered.
 	 *
 	 * @dataProvider data_types
 	 *
@@ -34,7 +34,8 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => $type ) );
 		$lite->load_hooks();
 
-		$this->assertIsInt( has_filter( "{$type}s_api", array( $lite, 'repo_api_details' ) ) );
+		$this->assertIsInt( has_filter( 'plugins_api', array( $lite, 'plugin_api_details' ) ) );
+		$this->assertIsInt( has_filter( 'themes_api', array( $lite, 'theme_api_details' ) ) );
 	}
 
 	/**
