@@ -29,7 +29,8 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 			$lite->plugin_api_details( true, $action, (object) array( 'test' => 'response' ) )
 		);
 	}
-		/**
+
+	/**
 	 * Tests that the original result is returned when the action
 	 * is not for information on the current type of asset.
 	 *
@@ -73,7 +74,7 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 		);
 	}
 
-		/**
+	/**
 	 * Data provider.
 	 *
 	 * @return array[]
@@ -144,7 +145,6 @@ class Lite_RepoApiDetailsTest extends GitUpdater_UnitTestCase {
 			$api_data,
 			$lite->theme_api_details( true, 'theme_information', (object) array( 'slug' => "my-{$type}" ) )
 		);
-
 	}
 
 	/**
