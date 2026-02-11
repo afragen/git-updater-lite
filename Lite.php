@@ -162,9 +162,10 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 */
 		public function load_hooks() {
 			$type = $this->api_data->type;
-			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
-			add_filter( "{$type}s_api", array( $this, 'repo_api_details' ), 99, 3 );
-			add_filter( "site_transient_update_{$type}s", array( $this, 'update_site_transient' ), 20, 1 );
+			add_filter( 'plugins_api', array( $this, 'plugin_api_details' ), 99, 3 );
+			add_filter( 'themes_api', array( $this, 'theme_api_details' ), 99, 3 );
+			add_filter( 'site_transient_update_plugins', array( $this, 'update_site_transient' ), 20, 1 );
+			add_filter( 'site_transient_update_themes', array( $this, 'update_site_transient' ), 20, 1 );
 			if ( ! is_multisite() ) {
 				add_filter( 'wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
 			}
@@ -246,8 +247,30 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 *
 		 * @return stdClass|bool
 		 */
-		public function repo_api_details( $result, string $action, stdClass $response ) {
-			if ( "{$this->api_data->type}_information" !== $action ) {
+		public function plugin_api_details( $result, string $action, stdClass $response ) {
+			if ( 'plugin_information' !== $action ) {
+				return $result;
+			}
+
+			// Exit if not our repo.
+			if ( $response->slug !== $this->api_data->slug ) {
+				return $result;
+			}
+
+			return $this->api_data;
+		}
+
+		/**
+		 * Put changelog in themess_api, return WP.org data as appropriate
+		 *
+		 * @param bool     $result   Default false.
+		 * @param string   $action   The type of information being requested from the Theme Installation API.
+		 * @param stdClass $response Repo API arguments.
+		 *
+		 * @return stdClass|bool
+		 */
+		public function theme_api_details( $result, string $action, stdClass $response ) {
+			if ( 'theme_information' !== $action ) {
 				return $result;
 			}
 
