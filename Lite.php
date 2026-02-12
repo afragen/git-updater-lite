@@ -162,13 +162,17 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 * @return void
 		 */
 		public function load_hooks() {
-			$type = $this->api_data->type;
 			add_filter( 'upgrader_source_selection', array( __CLASS__, 'upgrader_source_selection' ), 10, 4 );
-			add_filter( 'plugins_api', array( $this, 'plugin_api_details' ), 99, 3 );
-			add_filter( 'themes_api', array( $this, 'theme_api_details' ), 99, 3 );
-			add_filter( "site_transient_update_{$type}s", array( $this, 'update_site_transient' ), 20, 1 );
-			if ( ! is_multisite() ) {
-				add_filter( 'wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
+			if ( 'plugin' === $this->api_data->type ) {
+				add_filter( 'plugins_api', array( $this, 'plugin_api_details' ), 99, 3 );
+				add_filter( 'site_transient_update_plugins', array( $this, 'update_site_transient' ), 20, 1 );
+			}
+			if ( 'theme' === $this->api_data->type ) {
+				add_filter( 'themes_api', array( $this, 'theme_api_details' ), 99, 3 );
+				add_filter( 'site_transient_update_themes', array( $this, 'update_site_transient' ), 20, 1 );
+				if ( ! is_multisite() ) {
+					add_filter( 'wp_prepare_themes_for_js', array( $this, 'customize_theme_update_html' ) );
+				}
 			}
 
 			// Load hook for adding authentication headers for download packages.
