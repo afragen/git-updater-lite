@@ -141,15 +141,6 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				if ( null === $this->api_data || empty( (array) $this->api_data ) || property_exists( $this->api_data, 'error' ) ) {
 					return new WP_Error( 'non_json_api_response', 'Poorly formed JSON', $response );
 				}
-				/**
-				 * Apply filter to API data.
-				 * Used for development channel.
-				 *
-				 * @param object $api_data The API data object.
-				 * @param string $slug The plugin/theme slug.
-				 * @param string $url The API URL.
-				 */
-				$this->api_data       = apply_filters( 'git_updater_lite_api_data', $this->api_data, $this->slug, $url );
 				$this->api_data->file = $this->file;
 
 				// Set timeout for transient via filter.
