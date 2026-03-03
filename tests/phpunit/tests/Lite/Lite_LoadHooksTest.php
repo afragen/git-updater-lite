@@ -72,8 +72,8 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 	 * @group ms-excluded
 	 */
 	public function test_should_filter_wp_prepare_themes_for_js_on_single_site() {
-		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin' ) );
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['theme'] );
+		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'theme' ) );
 		$lite->load_hooks();
 
 		$this->assertIsInt( has_filter( 'wp_prepare_themes_for_js', array( $lite, 'customize_theme_update_html' ) ) );
@@ -85,8 +85,8 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 	 * @group ms-required
 	 */
 	public function test_should_not_filter_wp_prepare_themes_for_js_on_multisite() {
-		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin' ) );
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['theme'] );
+		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'theme' ) );
 		$lite->load_hooks();
 
 		$this->assertFalse( has_filter( 'wp_prepare_themes_for_js', array( $lite, 'customize_theme_update_html' ) ) );
