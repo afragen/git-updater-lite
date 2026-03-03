@@ -133,7 +133,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				 */
 				$url      = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
 				$response = wp_remote_get( $url );
-				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) === 404 ) {
+				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 					return $response;
 				}
 
