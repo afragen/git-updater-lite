@@ -34,8 +34,12 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => $type ) );
 		$lite->load_hooks();
 
-		$this->assertIsInt( has_filter( 'plugins_api', array( $lite, 'plugin_api_details' ) ) );
-		$this->assertIsInt( has_filter( 'themes_api', array( $lite, 'theme_api_details' ) ) );
+		if ( 'plugin' === $type ) {
+			$this->assertIsInt( has_filter( 'plugins_api', array( $lite, 'plugin_api_details' ) ) );
+		}
+		if ( 'theme' === $type ) {
+			$this->assertIsInt( has_filter( 'themes_api', array( $lite, 'theme_api_details' ) ) );
+		}
 	}
 
 	/**

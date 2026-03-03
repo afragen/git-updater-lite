@@ -272,9 +272,10 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 		$file      = $this->get_property_value( $lite, 'file' );
 		$api_data  = $this->get_property_value( $lite, 'api_data' );
 		$transient = get_site_transient( "git-updater-lite_{$file}" );
+		$class     = get_class( (object) $api_data );
 
 		$this->assertInstanceOf(
-			get_class( $api_data ),
+			$class,
 			$transient,
 			'The transient is not the expected type.'
 		);
@@ -306,9 +307,10 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 		$file      = $this->get_property_value( $lite, 'file' );
 		$api_data  = $this->get_property_value( $lite, 'api_data' );
 		$transient = get_site_transient( "git-updater-lite_{$file}" );
+		$class     = get_class( (object) $api_data );
 
 		$this->assertInstanceOf(
-			get_class( $api_data ),
+			$class,
 			$transient,
 			'The transient is not the expected type.'
 		);
