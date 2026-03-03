@@ -66,6 +66,7 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 	public function test_should_return_wp_error_for_an_invalid_json_response( $res ) {
 		$GLOBALS['pagenow'] = 'update-core.php';
 
+		$res['response']['code'] = 200;
 		$this->filter_http_request(
 			'https://my-plugin.com',
 			$res
@@ -205,7 +206,12 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 
 		$this->filter_http_request(
 			'https://my-plugin.com',
-			array( 'body' => '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}' )
+			array(
+				'body'     => '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}',
+				'response' => array(
+					'code' => 200,
+				),
+			)
 		);
 
 		$this->assertNull( ( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run() );
@@ -241,7 +247,12 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 		$response = '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}';
 		$this->filter_http_request(
 			'https://my-plugin.com',
-			array( 'body' => $response )
+			array(
+				'body'     => $response,
+				'response' => array(
+					'code' => 200,
+				),
+			)
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
@@ -263,7 +274,12 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 		$response = '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}';
 		$this->filter_http_request(
 			'https://my-plugin.com',
-			array( 'body' => $response )
+			array(
+				'body'     => $response,
+				'response' => array(
+					'code' => 200,
+				),
+			)
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
@@ -298,7 +314,12 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 		$response = '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","url":"https:\/\/github.com\/afragen\/git-updater","is_private":false,"dot_org":false,"release_asset":false,"version":"12.12.1","author":"Andy Fragen","contributors":{"afragen":{"display_name":"afragen","profile":"\/\/profiles.wordpress.org\/afragen","avatar":"https:\/\/wordpress.org\/grav-redirect.php?user=afragen"}},"requires":"5.9","tested":"6.8.2","requires_php":"8.0","requires_plugins":[],"sections":{"description":"<p>This is a description.<\/p>"},"short_description":"This is a short description.","primary_branch":"main","branch":"main","download_link":"https:\/\/downloads.example.org\/file.zip","tags":{},"donate_link":"","banners":{},"icons":{"default":"https:\/\/s.w.org\/plugins\/geopattern-icon\/git-updater.svg","svg":"https:\/\/raw.githubusercontent.com\/afragen\/git-updater\/master\/assets\/icon.svg"},"last_updated":"2025-02-12T17:58:02Z","num_ratings":0,"rating":0,"active_installs":0,"homepage":"https:\/\/git-updater.com","external":"xxx"}';
 		$this->filter_http_request(
 			'https://my-plugin.com',
-			array( 'body' => $response )
+			array(
+				'body'     => $response,
+				'response' => array(
+					'code' => 200,
+				),
+			)
 		);
 
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
