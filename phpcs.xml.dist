@@ -64,6 +64,9 @@
         <exclude name="Universal.CodeAnalysis.ConstructorDestructorReturn.ReturnValueFound"/>
         <exclude name="Universal.CodeAnalysis.ConstructorDestructorReturn.ReturnValueFound"/>
     </rule>
+	<rule ref="Universal.Arrays">
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found"/>
+	</rule>
 
     <!-- Exclude test files from some sniffs. -->
     <rule ref="Squiz.Commenting.ClassComment.Missing">
