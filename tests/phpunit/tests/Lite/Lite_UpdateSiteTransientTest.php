@@ -672,4 +672,154 @@ class Lite_UpdateSiteTransientTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', $api_data );
 		$lite->update_site_transient( false );
 	}
+
+	/**
+	 * Tests that a theme is added to response when version is newer.
+	 */
+	public function test_should_add_theme_to_response_when_version_is_newer() {
+		$api_data = (object) array(
+			'slug'          => 'my-theme',
+			'file'          => 'my-theme/style.css',
+			'type'          => 'theme',
+			'url'           => 'http://example.org',
+			'version'       => '2.0.0',
+			'icons'         => (object) array(
+				'1x' => 'icon-1x.png',
+				'2x' => 'icon-2x.png',
+			),
+			'banners'       => (object) array(
+				'low'  => 'banner-low.png',
+				'high' => 'banner-high.png',
+			),
+			'branch'        => 'test-branch',
+			'git'           => 'test-githost',
+			'requires'      => 'test-version',
+			'requires_php'  => 'test-php-version',
+			'download_link' => 'test-download-link',
+			'tested'        => '10.0.0',
+		);
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['theme'] );
+		$this->set_property_value( $lite, 'api_data', $api_data );
+		$this->set_property_value( $lite, 'local_version', '1.0.1' );
+
+		$actual = $lite->update_site_transient( new stdClass() );
+
+		$this->assertObjectHasProperty( 'response', $actual );
+		$this->assertArrayHasKey( 'my-theme', $actual->response );
+		$this->assertSame( '2.0.0', $actual->response['my-theme']['new_version'] );
+	}
+
+	/**
+	 * Tests that a theme is added to no_update when version is current.
+	 */
+	public function test_should_add_theme_to_no_update_when_version_is_current() {
+		$api_data = (object) array(
+			'slug'          => 'my-theme',
+			'file'          => 'my-theme/style.css',
+			'type'          => 'theme',
+			'url'           => 'http://example.org',
+			'version'       => '1.0.1',
+			'icons'         => (object) array(
+				'1x' => 'icon-1x.png',
+				'2x' => 'icon-2x.png',
+			),
+			'banners'       => (object) array(
+				'low'  => 'banner-low.png',
+				'high' => 'banner-high.png',
+			),
+			'branch'        => 'test-branch',
+			'git'           => 'test-githost',
+			'requires'      => 'test-version',
+			'requires_php'  => 'test-php-version',
+			'download_link' => 'test-download-link',
+			'tested'        => '10.0.0',
+		);
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['theme'] );
+		$this->set_property_value( $lite, 'api_data', $api_data );
+		$this->set_property_value( $lite, 'local_version', '1.0.1' );
+
+		$actual = $lite->update_site_transient( new stdClass() );
+
+		$this->assertObjectNotHasProperty( 'response', $actual );
+		$this->assertObjectHasProperty( 'no_update', $actual );
+		$this->assertArrayHasKey( 'my-theme', $actual->no_update );
+		$this->assertSame( '1.0.1', $actual->no_update['my-theme']['new_version'] );
+	}
+
+	/**
+	 * Tests that a plugin is added to response when version is newer.
+	 */
+	public function test_should_add_plugin_to_response_when_version_is_newer() {
+		$api_data = (object) array(
+			'slug'          => 'my-plugin',
+			'file'          => 'my-plugin/my-plugin.php',
+			'type'          => 'plugin',
+			'url'           => 'http://example.org',
+			'version'       => '2.0.0',
+			'icons'         => (object) array(
+				'1x' => 'icon-1x.png',
+				'2x' => 'icon-2x.png',
+			),
+			'banners'       => (object) array(
+				'low'  => 'banner-low.png',
+				'high' => 'banner-high.png',
+			),
+			'branch'        => 'test-branch',
+			'git'           => 'test-githost',
+			'requires'      => 'test-version',
+			'requires_php'  => 'test-php-version',
+			'download_link' => 'test-download-link',
+			'tested'        => '10.0.0',
+		);
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$this->set_property_value( $lite, 'api_data', $api_data );
+		$this->set_property_value( $lite, 'local_version', '1.0.2' );
+
+		$actual = $lite->update_site_transient( new stdClass() );
+
+		$this->assertObjectHasProperty( 'response', $actual );
+		$this->assertArrayHasKey( 'my-plugin/my-plugin.php', $actual->response );
+		$this->assertSame( '2.0.0', $actual->response['my-plugin/my-plugin.php']->new_version );
+	}
+
+	/**
+	 * Tests that a plugin is added to no_update when version is current.
+	 */
+	public function test_should_add_plugin_to_no_update_when_version_is_current() {
+		$api_data = (object) array(
+			'slug'          => 'my-plugin',
+			'file'          => 'my-plugin/my-plugin.php',
+			'type'          => 'plugin',
+			'url'           => 'http://example.org',
+			'version'       => '1.0.2',
+			'icons'         => (object) array(
+				'1x' => 'icon-1x.png',
+				'2x' => 'icon-2x.png',
+			),
+			'banners'       => (object) array(
+				'low'  => 'banner-low.png',
+				'high' => 'banner-high.png',
+			),
+			'branch'        => 'test-branch',
+			'git'           => 'test-githost',
+			'requires'      => 'test-version',
+			'requires_php'  => 'test-php-version',
+			'download_link' => 'test-download-link',
+			'tested'        => '10.0.0',
+		);
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$this->set_property_value( $lite, 'api_data', $api_data );
+		$this->set_property_value( $lite, 'local_version', '1.0.2' );
+
+		$actual = $lite->update_site_transient( new stdClass() );
+
+		$this->assertObjectNotHasProperty( 'response', $actual );
+		$this->assertObjectHasProperty( 'no_update', $actual );
+		$this->assertArrayHasKey( 'my-plugin/my-plugin.php', $actual->no_update );
+		$this->assertSame( '1.0.2', $actual->no_update['my-plugin/my-plugin.php']->new_version );
+	}
 }
