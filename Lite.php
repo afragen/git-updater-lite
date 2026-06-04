@@ -224,9 +224,11 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 						return $temp_file;
 					}
 
+					$upgrader->skin->feedback( 'downloading_package', $package );
+
 					return $temp_file;
 				},
-				10,
+				20,
 				3
 			);
 		}
