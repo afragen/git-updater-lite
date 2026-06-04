@@ -176,13 +176,58 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				}
 			}
 
-			// Load hook for adding authentication headers for download packages.
+			// Load hook for intercepting git-updater-lite downloads to fetch fresh tokens.
 			add_filter(
 				'upgrader_pre_download',
-				function () {
-					add_filter( 'http_request_args', array( $this, 'add_auth_header' ), 20, 2 );
-					return false; // upgrader_pre_download filter default return value.
-				}
+				function ( $reply, $package, $upgrader ) {
+					if ( ! str_contains( $package, 'download-token/' ) ) {
+						// Proceed normally for non-git-updater packages or direct URLs.
+						add_filter( 'http_request_args', array( $this, 'add_auth_header' ), 20, 2 );
+						return false;
+					}
+
+					$args = [
+						'timeout' => 15,
+						'headers' => [
+							'X-GU-Site-Domain' => $this->get_site_domain(),
+						],
+					];
+
+					$response    = wp_remote_get( $package, $args );
+					$status_code = wp_remote_retrieve_response_code( $response );
+
+					if ( is_wp_error( $response ) || 200 !== $status_code ) {
+						$error_msg = 'Failed to get download token.';
+
+						if ( 403 === $status_code ) {
+							$body       = json_decode( wp_remote_retrieve_body( $response ), true );
+							$server_msg = $body['message'] ?? 'Access denied.';
+							$error_msg  = sprintf(
+								'Update blocked: %s',
+								esc_html( $server_msg )
+							);
+						}
+
+						return new WP_Error( 'gu_token_fetch_failed', $error_msg );
+					}
+
+					$body      = json_decode( wp_remote_retrieve_body( $response ), true );
+					$fresh_url = $body['download_link'] ?? null;
+
+					if ( ! $fresh_url ) {
+						return new WP_Error( 'gu_no_fresh_url', 'No download link in token response.' );
+					}
+
+					$temp_file = download_url( $fresh_url, 300 );
+
+					if ( is_wp_error( $temp_file ) ) {
+						return $temp_file;
+					}
+
+					return $temp_file;
+				},
+				10,
+				3
 			);
 		}
 
@@ -331,6 +376,15 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			}
 
 			return $transient;
+		}
+
+		/**
+		 * Get the site domain for optional validation.
+		 *
+		 * @return string
+		 */
+		private function get_site_domain(): string {
+			return sanitize_text_field( parse_url( home_url(), PHP_URL_HOST ) );
 		}
 
 		/**
