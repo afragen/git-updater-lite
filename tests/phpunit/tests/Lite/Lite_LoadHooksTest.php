@@ -100,7 +100,7 @@ class Lite_LoadHooksTest extends GitUpdater_UnitTestCase {
 		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin' ) );
 		$lite->load_hooks();
 
-		apply_filters( 'upgrader_pre_download', false, 'https://example.com/package.zip', new Plugin_Upgrader() );
+		apply_filters( 'upgrader_pre_download', false, 'https://example.com/package.zip', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 		$this->assertIsInt( has_filter( 'http_request_args', array( $lite, 'add_auth_header' ) ) );
 	}
 }

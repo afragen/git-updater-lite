@@ -224,7 +224,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 						return $temp_file;
 					}
 
-					$upgrader->skin->feedback( 'downloading_package', $package );
+					$upgrader->skin->feedback( 'downloading_package', $fresh_url );
 
 					return $temp_file;
 				},

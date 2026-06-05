@@ -36,7 +36,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 		$lite->load_hooks();
 
 		// Apply the filter with a non-token package URL.
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://example.com/package.zip', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://example.com/package.zip', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		// Should return false to proceed with normal download.
 		$this->assertFalse( $result );
@@ -92,7 +92,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertNotNull( $captured_args, 'Token request was not made.' );
 		$this->assertArrayHasKey( 'headers', $captured_args );
@@ -125,7 +125,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_token_fetch_failed', $result->get_error_code() );
@@ -158,7 +158,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_token_fetch_failed', $result->get_error_code() );
@@ -190,7 +190,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_no_fresh_url', $result->get_error_code() );
@@ -235,7 +235,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'download_failed', $result->get_error_code() );
@@ -287,7 +287,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader() );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertIsString( $result );
 		$this->assertFileExists( $result );
