@@ -37,7 +37,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 			$lite->upgrader_source_selection(
 				'source',
 				'remote-source',
-				new Plugin_Upgrader(),
+				new Plugin_Upgrader( new Plugin_Upgrader_Skin() ),
 				array( 'action' => 'install' )
 			)
 		);
@@ -54,7 +54,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 			$lite->upgrader_source_selection(
 				'path/to/my-plugin',
 				'remote-source',
-				new Plugin_Upgrader(),
+				new Plugin_Upgrader( new Plugin_Upgrader_Skin() ),
 				array( 'plugin' => 'my-plugin/my-plugin.php' )
 			)
 		);
@@ -71,7 +71,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 			$lite->upgrader_source_selection(
 				'path/to/my-theme',
 				'remote-source',
-				new Theme_Upgrader(),
+				new Theme_Upgrader( new Theme_Upgrader_Skin() ),
 				array( 'theme' => 'my-theme' )
 			)
 		);
@@ -90,7 +90,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 		$lite->upgrader_source_selection(
 			'path/to/my-plugin-download',
 			'new/path/to/',
-			new Plugin_Upgrader(),
+			new Plugin_Upgrader( new Plugin_Upgrader_Skin() ),
 			array( 'plugin' => 'my-plugin/my-plugin.php' )
 		);
 
@@ -110,7 +110,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 		$lite->upgrader_source_selection(
 			'path/to/my-theme-download',
 			'new/path/to/',
-			new Theme_Upgrader(),
+			new Theme_Upgrader( new Theme_Upgrader_Skin() ),
 			array( 'theme' => 'my-theme' )
 		);
 
@@ -130,7 +130,7 @@ class Lite_UpgraderSourceSelectionTest extends GitUpdater_UnitTestCase {
 			$lite->upgrader_source_selection(
 				$error,
 				'remote-source',
-				new Plugin_Upgrader(),
+				new Plugin_Upgrader( new Plugin_Upgrader_Skin() ),
 				array( 'plugin' => 'my-plugin/my-plugin.php' )
 			)
 		);

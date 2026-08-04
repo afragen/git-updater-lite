@@ -143,6 +143,9 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				}
 				$this->api_data->file = $this->file;
 
+				// Filter the dev release asset version for a repo. This allows for overriding the version number if needed.
+				$this->api_data->version = apply_filters( 'gu_dev_release_asset_version', $this->api_data->version, $this->api_data );
+
 				// Set timeout for transient via filter.
 				$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->file );
 				set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, $timeout );
@@ -224,9 +227,11 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 						return $temp_file;
 					}
 
+					$upgrader->skin->feedback( 'downloading_package', $fresh_url );
+
 					return $temp_file;
 				},
-				10,
+				20,
 				3
 			);
 		}
