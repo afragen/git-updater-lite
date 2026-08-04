@@ -52,7 +52,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_sends_site_domain_header_for_token_packages() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		$captured_args = null;
@@ -106,7 +113,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_returns_error_on_403() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		// Mock 403 response.
@@ -139,7 +153,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_returns_error_on_non_200_status() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		// Mock 500 response.
@@ -171,7 +192,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_returns_error_when_no_download_link() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		// Mock response without download_link.
@@ -203,7 +231,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_returns_download_url_error() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		// Mock token endpoint response.
@@ -248,7 +283,14 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	 */
 	public function test_upgrader_pre_download_returns_temp_file_on_success() {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
-		$this->set_property_value( $lite, 'api_data', (object) array( 'type' => 'plugin', 'slug' => 'my-plugin' ) );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type' => 'plugin',
+				'slug' => 'my-plugin',
+			)
+		);
 		$lite->load_hooks();
 
 		$fresh_url = 'https://downloads.example.org/fresh-package.zip';
