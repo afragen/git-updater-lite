@@ -132,8 +132,26 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				 * @param string $slug The plugin/theme slug
 				 */
 				$url      = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
-				$response = wp_remote_get( $url );
-				if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
+				$response = wp_remote_get( $url, $this->get_api_request_args() );
+				if ( is_wp_error( $response ) ) {
+					return $response;
+				}
+
+				$status_code = wp_remote_retrieve_response_code( $response );
+				if ( 200 !== $status_code ) {
+					// A 403 here means the update server withholds this package from
+					// this site (private package with no authorized domain). Surface
+					// the server message instead of failing silently.
+					if ( 403 === $status_code ) {
+						$body       = json_decode( wp_remote_retrieve_body( $response ), true );
+						$server_msg = $body['message'] ?? 'Access denied.';
+
+						return new WP_Error(
+							'gu_update_blocked',
+							sprintf( 'Update blocked: %s', esc_html( $server_msg ) )
+						);
+					}
+
 					return $response;
 				}
 
@@ -186,12 +204,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 						return false;
 					}
 
-					$args = [
-						'timeout' => 15,
-						'headers' => [
-							'X-GU-Site-Domain' => $this->get_site_domain(),
-						],
-					];
+					$args = $this->get_api_request_args();
 
 					$response    = wp_remote_get( $package, $args );
 					$status_code = wp_remote_retrieve_response_code( $response );
@@ -387,6 +400,26 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 */
 		private function get_site_domain(): string {
 			return sanitize_text_field( parse_url( home_url(), PHP_URL_HOST ) );
+		}
+
+		/**
+		 * Request args for update server calls.
+		 *
+		 * Identifies the requesting site's own domain so the server can authorize
+		 * it for private packages. Sent on both the metadata (update-api) and
+		 * download-token requests; no released client sends any header on
+		 * update-api before this version, so the server treats its presence as
+		 * the marker for a client that has the update.
+		 *
+		 * @return array<string, mixed>
+		 */
+		private function get_api_request_args(): array {
+			return [
+				'timeout' => 15,
+				'headers' => [
+					'X-GU-Site-Domain' => $this->get_site_domain(),
+				],
+			];
 		}
 
 		/**
