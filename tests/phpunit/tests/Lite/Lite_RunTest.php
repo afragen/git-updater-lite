@@ -342,4 +342,84 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 			'The "api_data" and transient values not match.'
 		);
 	}
+
+	/**
+	 * Tests that the requesting site's own domain is sent on the update-api
+	 * request, so an update server can authorize it for a private package.
+	 */
+	public function test_should_send_site_domain_header_on_update_api_request() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		delete_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' );
+
+		$captured_args = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$captured_args ) {
+				if ( ! str_contains( $url, 'update-api' ) ) {
+					return $response;
+				}
+
+				$captured_args = $parsed_args;
+
+				return array(
+					'body'     => '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","version":"1.0.3","download_link":"https://downloads.example.org/file.zip"}',
+					'response' => array( 'code' => 200 ),
+				);
+			},
+			10,
+			3
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertIsArray( $captured_args, 'The update-api request was not made.' );
+		$this->assertArrayHasKey( 'headers', $captured_args );
+		$this->assertArrayHasKey( 'X-GU-Site-Domain', $captured_args['headers'] );
+		$this->assertSame(
+			parse_url( home_url(), PHP_URL_HOST ),
+			$captured_args['headers']['X-GU-Site-Domain'],
+			'The wrong site domain was sent.'
+		);
+	}
+
+	/**
+	 * Tests that a 403 from the update server surfaces as a WP_Error carrying
+	 * the server message, rather than failing silently.
+	 */
+	public function test_should_return_wp_error_when_update_api_responds_403() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		delete_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' );
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => wp_json_encode(
+					array(
+						'code'    => 'gu_private_package',
+						'message' => 'Specified repo is not shared.',
+					)
+				),
+				'response' => array( 'code' => 403 ),
+			)
+		);
+
+		$actual = ( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertWPError( $actual, 'A WP_Error object was not returned.' );
+		$this->assertSame(
+			'gu_update_blocked',
+			$actual->get_error_code(),
+			'The wrong error code was returned.'
+		);
+		$this->assertStringContainsString(
+			'Specified repo is not shared.',
+			$actual->get_error_message(),
+			'The server message was not surfaced.'
+		);
+	}
 }

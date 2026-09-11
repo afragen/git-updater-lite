@@ -30,6 +30,8 @@ The REST endpoint format is as follows.
 
 Version 3.0.0 works better with repositories requiring authentication headers using a 2-step process and not exposing the authentication header. It can also be set in Git Updater to use domain validation.
 
+Version 3.1.0 sends the requesting site's own domain (`X-GU-Site-Domain`) on the `update-api` request, in addition to the existing `download-token` request. This lets an update server authorize a specific site for a **private** package on the metadata route. If you distribute private packages, your update server's Git Updater must be new enough to enforce this, and each client site's domain must be listed on the server's **Lite Client Domains** tab — otherwise the server withholds the package and updates stop for that site. See the Git Updater docs for the rollout order; older clients send no headers on `update-api` and cannot be authorized for private packages.
+
 ## Installation
 
 Add via composer. `composer require afragen/git-updater-lite:^3`
