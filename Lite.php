@@ -146,6 +146,13 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 						$body       = json_decode( wp_remote_retrieve_body( $response ), true );
 						$server_msg = $body['message'] ?? 'Access denied.';
 
+						// A private package marks this slug and mints a client key, so the
+						// next request presents it for approval.
+						if ( isset( $body['code'] ) && 'gu_private_package' === $body['code'] ) {
+							$this->mark_private_slug( $this->slug );
+							$this->generate_client_key();
+						}
+
 						return new WP_Error(
 							'gu_update_blocked',
 							sprintf( 'Update blocked: %s', esc_html( $server_msg ) )
@@ -219,6 +226,12 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 								'Update blocked: %s',
 								esc_html( $server_msg )
 							);
+
+							$code = $body['code'] ?? '';
+							if ( in_array( $code, [ 'gu_private_package', 'gu_unauthorized_domain' ], true ) ) {
+								$this->mark_private_slug( $this->slug );
+								$this->generate_client_key();
+							}
 						}
 
 						return new WP_Error( 'gu_token_fetch_failed', $error_msg );
@@ -394,31 +407,104 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		}
 
 		/**
-		 * Get the site domain for optional validation.
+		 * Client key for private-package access.
+		 *
+		 * A constant or filter can pre-set the key; otherwise the locally stored
+		 * (self-generated) key is returned, or an empty string when none exists yet.
 		 *
 		 * @return string
 		 */
-		private function get_site_domain(): string {
-			return sanitize_text_field( parse_url( home_url(), PHP_URL_HOST ) );
+		private function get_client_key(): string {
+			if ( defined( 'GIT_UPDATER_LITE_CLIENT_KEY' ) ) {
+				return sanitize_text_field( (string) GIT_UPDATER_LITE_CLIENT_KEY );
+			}
+
+			/**
+			 * Filter to pre-set the lite client key.
+			 *
+			 * @param string $key Client key.
+			 */
+			$key = apply_filters( 'git_updater_lite_client_key', '' );
+			if ( is_string( $key ) && '' !== $key ) {
+				return sanitize_text_field( $key );
+			}
+
+			return sanitize_text_field( (string) get_site_option( 'git_updater_lite_client_key', '' ) );
+		}
+
+		/**
+		 * Generate and persist a client key if none exists.
+		 *
+		 * Only called when a private package is encountered, so a client that
+		 * uses only public packages never creates a key.
+		 *
+		 * @return string
+		 */
+		private function generate_client_key(): string {
+			$key = $this->get_client_key();
+			if ( '' !== $key ) {
+				return $key;
+			}
+
+			$key = bin2hex( random_bytes( 32 ) );
+			update_site_option( 'git_updater_lite_client_key', $key );
+
+			return $key;
+		}
+
+		/**
+		 * Whether a slug has been seen as a private package.
+		 *
+		 * @param string $slug Package slug.
+		 * @return bool
+		 */
+		private function is_private_slug( string $slug ): bool {
+			return in_array( $slug, (array) get_site_option( 'git_updater_lite_private_slugs', [] ), true );
+		}
+
+		/**
+		 * Record a slug as a private package.
+		 *
+		 * @param string $slug Package slug.
+		 * @return void
+		 */
+		private function mark_private_slug( string $slug ) {
+			$slugs = (array) get_site_option( 'git_updater_lite_private_slugs', [] );
+			if ( ! in_array( $slug, $slugs, true ) ) {
+				$slugs[] = $slug;
+				update_site_option( 'git_updater_lite_private_slugs', $slugs );
+			}
+		}
+
+		/**
+		 * Display-only label identifying this site to the server.
+		 *
+		 * @return string
+		 */
+		private function get_site_label(): string {
+			return sanitize_text_field( parse_url( home_url(), PHP_URL_HOST ) . ' (' . get_bloginfo( 'name' ) . ')' );
 		}
 
 		/**
 		 * Request args for update server calls.
 		 *
-		 * Identifies the requesting site's own domain so the server can authorize
-		 * it for private packages. Sent on both the metadata (update-api) and
-		 * download-token requests; no released client sends any header on
-		 * update-api before this version, so the server treats its presence as
-		 * the marker for a client that has the update.
+		 * For packages known to be private, identifies this site to the server
+		 * with an approved client key (X-GU-Lite-Key) and a display-only label.
+		 * Public packages carry neither header.
 		 *
 		 * @return array<string, mixed>
 		 */
 		private function get_api_request_args(): array {
+			$headers = [];
+			$key     = $this->get_client_key();
+			if ( '' !== $key && $this->is_private_slug( $this->slug ) ) {
+				$headers['X-GU-Lite-Key']     = $key;
+				$headers['X-GU-Client-Label'] = $this->get_site_label();
+			}
+
 			return [
 				'timeout' => 15,
-				'headers' => [
-					'X-GU-Site-Domain' => $this->get_site_domain(),
-				],
+				'headers' => $headers,
 			];
 		}
 

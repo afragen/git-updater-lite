@@ -9,22 +9,25 @@
  * Tests for Lite download token flow.
  *
  * @covers \Fragen\Git_Updater\Lite::load_hooks
- * @covers \Fragen\Git_Updater\Lite::get_site_domain
+ * @covers \Fragen\Git_Updater\Lite::get_client_key
  */
 class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	/**
-	 * Tests that get_site_domain() returns the expected domain.
+	 * Tests that get_client_key() returns the stored key, or empty when unset.
 	 */
-	public function test_get_site_domain_returns_expected_domain() {
+	public function test_get_client_key_returns_stored_key_or_empty() {
+		delete_site_option( 'git_updater_lite_client_key' );
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
 
-		$method = new ReflectionMethod( $lite, 'get_site_domain' );
+		$method = new ReflectionMethod( $lite, 'get_client_key' );
 		$method->setAccessible( true );
 
-		$actual   = $method->invoke( $lite );
-		$expected = parse_url( home_url(), PHP_URL_HOST );
+		$this->assertSame( '', $method->invoke( $lite ) );
 
-		$this->assertSame( $expected, $actual );
+		update_site_option( 'git_updater_lite_client_key', 'stored-key' );
+		$this->assertSame( 'stored-key', $method->invoke( $lite ) );
+
+		delete_site_option( 'git_updater_lite_client_key' );
 	}
 
 	/**
@@ -48,9 +51,12 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 	}
 
 	/**
-	 * Tests that X-GU-Site-Domain header is sent for token packages.
+	 * Tests that X-GU-Lite-Key is sent for token packages when the slug is private.
 	 */
-	public function test_upgrader_pre_download_sends_site_domain_header_for_token_packages() {
+	public function test_upgrader_pre_download_sends_client_key_for_token_packages() {
+		update_site_option( 'git_updater_lite_client_key', 'test-client-key' );
+		update_site_option( 'git_updater_lite_private_slugs', array( 'my-plugin' ) );
+
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
 		$this->set_property_value(
 			$lite,
@@ -103,9 +109,13 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 
 		$this->assertNotNull( $captured_args, 'Token request was not made.' );
 		$this->assertArrayHasKey( 'headers', $captured_args );
-		$this->assertArrayHasKey( 'X-GU-Site-Domain', $captured_args['headers'] );
+		$this->assertArrayHasKey( 'X-GU-Lite-Key', $captured_args['headers'] );
+		$this->assertSame( 'test-client-key', $captured_args['headers']['X-GU-Lite-Key'] );
+		$this->assertArrayHasKey( 'X-GU-Client-Label', $captured_args['headers'] );
 
 		remove_all_filters( 'pre_http_request' );
+		delete_site_option( 'git_updater_lite_client_key' );
+		delete_site_option( 'git_updater_lite_private_slugs' );
 	}
 
 	/**
