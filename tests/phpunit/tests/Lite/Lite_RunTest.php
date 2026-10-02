@@ -344,12 +344,13 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 	}
 
 	/**
-	 * Tests that the requesting site's own domain is sent on the update-api
-	 * request, so an update server can authorize it for a private package.
+	 * Tests that a public package carries no client-key header.
 	 */
-	public function test_should_send_site_domain_header_on_update_api_request() {
+	public function test_should_not_send_client_key_for_public_package() {
 		$GLOBALS['pagenow'] = 'update-core.php';
 		delete_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' );
+		delete_site_option( 'git_updater_lite_client_key' );
+		delete_site_option( 'git_updater_lite_private_slugs' );
 
 		$captured_args = null;
 
@@ -377,12 +378,46 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 
 		$this->assertIsArray( $captured_args, 'The update-api request was not made.' );
 		$this->assertArrayHasKey( 'headers', $captured_args );
-		$this->assertArrayHasKey( 'X-GU-Site-Domain', $captured_args['headers'] );
-		$this->assertSame(
-			parse_url( home_url(), PHP_URL_HOST ),
-			$captured_args['headers']['X-GU-Site-Domain'],
-			'The wrong site domain was sent.'
+		$this->assertArrayNotHasKey( 'X-GU-Lite-Key', $captured_args['headers'] );
+	}
+
+	/**
+	 * Tests that a private slug carries the client key and label.
+	 */
+	public function test_should_send_client_key_on_update_api_request_for_private_slug() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		delete_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' );
+		update_site_option( 'git_updater_lite_client_key', 'test-client-key' );
+		update_site_option( 'git_updater_lite_private_slugs', array( 'my-plugin' ) );
+
+		$captured_args = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$captured_args ) {
+				if ( ! str_contains( $url, 'update-api' ) ) {
+					return $response;
+				}
+
+				$captured_args = $parsed_args;
+
+				return array(
+					'body'     => '{"name":"My plugin","slug":"my-plugin","git":"github","type":"plugin","version":"1.0.3","download_link":"https://downloads.example.org/file.zip"}',
+					'response' => array( 'code' => 200 ),
+				);
+			},
+			10,
+			3
 		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		remove_all_filters( 'pre_http_request' );
+		delete_site_option( 'git_updater_lite_client_key' );
+		delete_site_option( 'git_updater_lite_private_slugs' );
+
+		$this->assertSame( 'test-client-key', $captured_args['headers']['X-GU-Lite-Key'] );
+		$this->assertArrayHasKey( 'X-GU-Client-Label', $captured_args['headers'] );
 	}
 
 	/**
