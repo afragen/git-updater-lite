@@ -73,3 +73,9 @@ require_once __DIR__ . '/vendor/afragen/git-updater-lite/Lite.php';
 ```
 
 FWIW, I test by decreasing the version number locally to see an update.
+
+## Caching
+
+The update API response for each plugin/theme is cached for 6 hours. Change this with the `git_updater_lite_transient_timeout` filter.
+
+To fetch fresh data sooner, for example right after refreshing a package on the update server, go to **Dashboard > Updates** and click **Check again**. This requires a user who can update plugins or themes. It fetches the update server's current data; it does not make the update server re-check the git host.
