@@ -187,7 +187,7 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 * @return void
 		 */
 		public function load_hooks() {
-			add_filter( 'upgrader_source_selection', array( __CLASS__, 'upgrader_source_selection' ), 10, 4 );
+			add_filter( 'upgrader_source_selection', array( __CLASS__, 'upgrader_source_selection' ), 20, 4 );
 			$type = $this->api_data->type ?? null;
 			if ( 'plugin' === $type ) {
 				add_filter( 'plugins_api', array( $this, 'plugin_api_details' ), 99, 3 );
