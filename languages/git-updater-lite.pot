@@ -7,37 +7,37 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-02T22:45:23+00:00\n"
+"POT-Creation-Date: 2026-11-18T23:43:16+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: git-updater-lite\n"
 
 #. translators: %s: theme name
-#: Lite.php:605
+#: Lite.php:659
 #, php-format
 msgid "There is a new version of %s available."
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: Lite.php:616
+#: Lite.php:670
 #, php-format
 msgid "View version %1$s details%2$s or %3$supdate now%2$s."
 msgstr ""
 
 #. translators: %s: theme name
-#: Lite.php:621
+#: Lite.php:675
 #, php-format
 msgid "Update %s now"
 msgstr ""
 
 #. translators: 1: version number, 2: closing anchor tag, 3: update URL
-#: Lite.php:628
+#: Lite.php:682
 #, php-format
 msgid "View version %1$s details%2$s."
 msgstr ""
 
 #. translators: %s: opening/closing paragraph and italic tags
-#: Lite.php:634
+#: Lite.php:688
 #, php-format
 msgid "%1$sAutomatic update is unavailable for this theme.%2$s"
 msgstr ""
