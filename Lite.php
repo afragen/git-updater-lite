@@ -168,14 +168,25 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				}
 				$this->api_data->file = $this->file;
 
-				// Set timeout for transient via filter.
-				$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->file );
-				set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, $timeout );
+				$new_key = $this->maybe_mark_private_from_api_data();
+
+				// Don't cache when the slug was just learned to be private or a
+				// key was just minted: force the next run to re-fetch with
+				// X-GU-Lite-Key so the server can record/approve this client.
+				if ( ! $new_key ) {
+					// Set timeout for transient via filter.
+					$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->file );
+					set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, $timeout );
+				}
 			} else {
 				if ( property_exists( $response, 'error' ) ) {
 					return new WP_Error( 'repo-no-exist', 'Specified repo does not exist' );
 				}
 				$this->api_data = $response;
+
+				if ( $this->maybe_mark_private_from_api_data() ) {
+					delete_site_transient( "git-updater-lite_{$this->file}" );
+				}
 			}
 
 			$this->load_hooks();
@@ -453,6 +464,31 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		}
 
 		/**
+		 * Mark this slug private and ensure a client key exists from a successful response.
+		 *
+		 * @return bool True when the slug was newly learned private or a key was
+		 *              created (caller should force a re-fetch to present the key).
+		 */
+		private function maybe_mark_private_from_api_data(): bool {
+			if ( ! property_exists( $this->api_data, 'is_private' ) ) {
+				return false;
+			}
+
+			if ( empty( $this->api_data->is_private ) ) {
+				$this->unmark_private_slug( $this->slug );
+				return false;
+			}
+
+			$was_private = $this->is_private_slug( $this->slug );
+			$had_key     = '' !== $this->get_client_key();
+
+			$this->mark_private_slug( $this->slug );
+			$this->generate_client_key();
+
+			return ! $was_private || ! $had_key;
+		}
+
+		/**
 		 * Whether a slug has been seen as a private package.
 		 *
 		 * @param string $slug Package slug.
@@ -474,6 +510,24 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				$slugs[] = $slug;
 				update_site_option( 'git_updater_lite_private_slugs', $slugs );
 			}
+		}
+
+		/**
+		 * Remove a slug from the private list.
+		 *
+		 * Used when a package that was previously private becomes public.
+		 *
+		 * @param string $slug Package slug.
+		 * @return void
+		 */
+		private function unmark_private_slug( string $slug ) {
+			$slugs = (array) get_site_option( 'git_updater_lite_private_slugs', [] );
+			if ( ! in_array( $slug, $slugs, true ) ) {
+				return;
+			}
+
+			$slugs = array_values( array_diff( $slugs, [ $slug ] ) );
+			update_site_option( 'git_updater_lite_private_slugs', $slugs );
 		}
 
 		/**
