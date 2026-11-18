@@ -457,4 +457,211 @@ class Lite_RunTest extends GitUpdater_UnitTestCase {
 			'The server message was not surfaced.'
 		);
 	}
+
+	/**
+	 * Tests that a private 200 response marks the slug and mints a key, and
+	 * does not cache the response so the next run can present the key.
+	 */
+	public function test_should_mark_private_and_generate_key_from_is_private_response() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		$this->reset_lite_state();
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => $this->api_response_body( true ),
+				'response' => array( 'code' => 200 ),
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		$this->assertContains( 'my-plugin', (array) get_site_option( 'git_updater_lite_private_slugs', array() ) );
+		$this->assertNotSame( '', (string) get_site_option( 'git_updater_lite_client_key', '' ) );
+		$this->assertFalse( get_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' ) );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Tests that a public 200 response does not mint a key or mark the slug.
+	 */
+	public function test_should_not_generate_key_for_public_response() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		$this->reset_lite_state();
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => $this->api_response_body( false ),
+				'response' => array( 'code' => 200 ),
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		$this->assertSame( '', (string) get_site_option( 'git_updater_lite_client_key', '' ) );
+		$this->assertNotContains( 'my-plugin', (array) get_site_option( 'git_updater_lite_private_slugs', array() ) );
+		$this->assertNotFalse( get_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' ) );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Tests that a cached private response is marked/keyed and the stale
+	 * transient is deleted so the next run presents the key.
+	 */
+	public function test_should_delete_cached_transient_when_private_response_is_cached() {
+		$this->reset_lite_state();
+
+		set_site_transient(
+			'git-updater-lite_my-plugin/my-plugin.php',
+			(object) array(
+				'name'          => 'My plugin',
+				'slug'          => 'my-plugin',
+				'git'           => 'github',
+				'type'          => 'plugin',
+				'is_private'    => true,
+				'version'       => '1.0.3',
+				'download_link' => 'https://downloads.example.org/file.zip',
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		$this->assertContains( 'my-plugin', (array) get_site_option( 'git_updater_lite_private_slugs', array() ) );
+		$this->assertNotSame( '', (string) get_site_option( 'git_updater_lite_client_key', '' ) );
+		$this->assertFalse( get_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' ) );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Tests that a pre-set key is not regenerated, but a newly learned private
+	 * slug still forces a re-fetch so the key is presented.
+	 */
+	public function test_should_force_refetch_for_newly_private_slug_with_preset_key() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		$this->reset_lite_state();
+		update_site_option( 'git_updater_lite_client_key', 'preset-client-key' );
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => $this->api_response_body( true ),
+				'response' => array( 'code' => 200 ),
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		$this->assertSame( 'preset-client-key', (string) get_site_option( 'git_updater_lite_client_key', '' ) );
+		$this->assertContains( 'my-plugin', (array) get_site_option( 'git_updater_lite_private_slugs', array() ) );
+		$this->assertFalse( get_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' ) );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Tests that the client key is sent on the next update-api request after
+	 * a private response taught the client the slug is private.
+	 */
+	public function test_should_send_client_key_after_learning_private_from_response() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		$this->reset_lite_state();
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => $this->api_response_body( true ),
+				'response' => array( 'code' => 200 ),
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+		remove_all_filters( 'pre_http_request' );
+
+		$captured_args = null;
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$captured_args ) {
+				if ( str_contains( $url, 'update-api' ) ) {
+					$captured_args = $parsed_args;
+					return array(
+						'body'     => $this->api_response_body( true ),
+						'response' => array( 'code' => 200 ),
+					);
+				}
+				return $response;
+			},
+			10,
+			3
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertSame(
+			(string) get_site_option( 'git_updater_lite_client_key', '' ),
+			$captured_args['headers']['X-GU-Lite-Key']
+		);
+		$this->assertArrayHasKey( 'X-GU-Client-Label', $captured_args['headers'] );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Tests that a slug marked private is unmarked when the API says it is
+	 * public again.
+	 */
+	public function test_should_unmark_private_slug_when_response_is_public() {
+		$GLOBALS['pagenow'] = 'update-core.php';
+		$this->reset_lite_state();
+		update_site_option( 'git_updater_lite_client_key', 'test-client-key' );
+		update_site_option( 'git_updater_lite_private_slugs', array( 'my-plugin' ) );
+
+		$this->filter_http_request(
+			'https://my-plugin.com',
+			array(
+				'body'     => $this->api_response_body( false ),
+				'response' => array( 'code' => 200 ),
+			)
+		);
+
+		( new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] ) )->run();
+
+		$this->assertNotContains( 'my-plugin', (array) get_site_option( 'git_updater_lite_private_slugs', array() ) );
+
+		$this->reset_lite_state();
+	}
+
+	/**
+	 * Minimal API response body for the private/public cases.
+	 *
+	 * @param bool $is_private Whether the package is private.
+	 * @return string
+	 */
+	private function api_response_body( $is_private ) {
+		return wp_json_encode(
+			array(
+				'name'          => 'My plugin',
+				'slug'          => 'my-plugin',
+				'git'           => 'github',
+				'type'          => 'plugin',
+				'is_private'    => $is_private,
+				'version'       => '1.0.3',
+				'download_link' => 'https://downloads.example.org/file.zip',
+			)
+		);
+	}
+
+	/**
+	 * Clear the Lite client options and transient used by these tests.
+	 */
+	private function reset_lite_state() {
+		delete_site_option( 'git_updater_lite_client_key' );
+		delete_site_option( 'git_updater_lite_private_slugs' );
+		delete_site_transient( 'git-updater-lite_my-plugin/my-plugin.php' );
+		remove_all_filters( 'pre_http_request' );
+	}
 }
