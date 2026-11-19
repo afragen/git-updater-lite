@@ -104,4 +104,16 @@ Do not authorize a legacy client by domain or IP instead — those are self-asse
 and reopen the anonymous-download vulnerability. See the Git Updater
 `docs/private-package-rollout.md` for the full rollout order.
 
+## Caching
+
+The update API response for each plugin/theme is cached for 6 hours in the
+`git-updater-lite_{$file}` site transient. Change the timeout with the
+`git_updater_lite_transient_timeout` filter.
+
+To refresh sooner, for example right after publishing a new release, go to **Dashboard → Updates**
+and click **Check again**. The cached data is discarded and refetched for users who can update the
+package's type (`update_plugins` for plugins, `update_themes` for themes), throttled to once per
+minute per package. If the refetch fails, the cached data is kept. It fetches the update server's
+current cached data; it does not make the update server re-check the git host.
+
 FWIW, I test by decreasing the version number locally to see an update.

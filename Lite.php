@@ -43,6 +43,12 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 
 		/** @var string */
 		protected $update_server;
+
+		/** @var bool Whether the update server was already queried during this request. */
+		protected $fetched = false;
+
+		/** @var bool Whether update hooks have been loaded. */
+		protected $hooks_loaded = false;
 		// phpcs:enable
 
 		/**
@@ -90,6 +96,15 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		}
 
 		/**
+		 * Site transient name for this package's cached API data.
+		 *
+		 * @return string
+		 */
+		private function transient_name(): string {
+			return "git-updater-lite_{$this->file}";
+		}
+
+		/**
 		 * Get API data.
 		 *
 		 * @global string $pagenow Current page.
@@ -118,65 +133,20 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			if ( empty( $this->update_server ) || is_wp_error( $this->update_server ) ) {
 				return new WP_Error( 'invalid_domain', 'Invalid update server domain', $this->update_server );
 			}
-			$url      = add_query_arg(
-				array( 'slug' => $this->slug ),
-				sprintf( '%s/wp-json/git-updater/v1/update-api/', $this->update_server )
-			);
-			$response = get_site_transient( "git-updater-lite_{$this->file}" );
+			// Dashboard > Updates > "Check again" bypasses the cached API data.
+			// Core's link carries no nonce, so force_check() gates on capability
+			// instead. It runs on load-update-core.php because run() executes
+			// before pluggable.php loads and current_user_can() is not callable.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( 'update-core.php' === $pagenow && ! empty( $_GET['force-check'] ) ) {
+				add_action( 'load-update-core.php', array( $this, 'force_check' ), 5 );
+			}
+
+			$response = get_site_transient( $this->transient_name() );
 			if ( ! $response ) {
-				/*
-				 * Apply filter to API URL.
-				 * Example, add `development` query arg to URL to get pre-release versions.
-				 *
-				 * @param string $url The API URL.
-				 * @param string $slug The plugin/theme slug
-				 */
-				$url      = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
-				$response = wp_remote_get( $url, $this->get_api_request_args() );
-				if ( is_wp_error( $response ) ) {
-					return $response;
-				}
-
-				$status_code = wp_remote_retrieve_response_code( $response );
-				if ( 200 !== $status_code ) {
-					// A 403 here means the update server withholds this package from
-					// this site (private package with no authorized domain). Surface
-					// the server message instead of failing silently.
-					if ( 403 === $status_code ) {
-						$body       = json_decode( wp_remote_retrieve_body( $response ), true );
-						$server_msg = $body['message'] ?? 'Access denied.';
-
-						// A private package marks this slug and mints a client key, so the
-						// next request presents it for approval.
-						if ( isset( $body['code'] ) && 'gu_private_package' === $body['code'] ) {
-							$this->mark_private_slug( $this->slug );
-							$this->generate_client_key();
-						}
-
-						return new WP_Error(
-							'gu_update_blocked',
-							sprintf( 'Update blocked: %s', esc_html( $server_msg ) )
-						);
-					}
-
-					return $response;
-				}
-
-				$this->api_data = (object) json_decode( wp_remote_retrieve_body( $response ), true );
-				if ( null === $this->api_data || empty( (array) $this->api_data ) || property_exists( $this->api_data, 'error' ) ) {
-					return new WP_Error( 'non_json_api_response', 'Poorly formed JSON', $response );
-				}
-				$this->api_data->file = $this->file;
-
-				$new_key = $this->maybe_mark_private_from_api_data();
-
-				// Don't cache when the slug was just learned to be private or a
-				// key was just minted: force the next run to re-fetch with
-				// X-GU-Lite-Key so the server can record/approve this client.
-				if ( ! $new_key ) {
-					// Set timeout for transient via filter.
-					$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->file );
-					set_site_transient( "git-updater-lite_{$this->file}", $this->api_data, $timeout );
+				$result = $this->fetch_api_data();
+				if ( is_wp_error( $result ) ) {
+					return $result;
 				}
 			} else {
 				if ( property_exists( $response, 'error' ) ) {
@@ -185,11 +155,121 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 				$this->api_data = $response;
 
 				if ( $this->maybe_mark_private_from_api_data() ) {
-					delete_site_transient( "git-updater-lite_{$this->file}" );
+					delete_site_transient( $this->transient_name() );
 				}
 			}
 
 			$this->load_hooks();
+		}
+
+		/**
+		 * Fetch API data from the update server.
+		 *
+		 * Assigns api_data and writes the transient only after the response
+		 * validates, so a failed or malformed response never replaces good data.
+		 *
+		 * @return true|WP_Error
+		 */
+		private function fetch_api_data() {
+			$this->fetched = true;
+
+			$url = add_query_arg(
+				array( 'slug' => $this->slug ),
+				sprintf( '%s/wp-json/git-updater/v1/update-api/', $this->update_server )
+			);
+
+			/*
+			 * Apply filter to API URL.
+			 * Example, add `development` query arg to URL to get pre-release versions.
+			 *
+			 * @param string $url The API URL.
+			 * @param string $slug The plugin/theme slug
+			 */
+			$url      = apply_filters( 'git_updater_lite_api_url', $url, $this->slug );
+			$response = wp_remote_get( $url, $this->get_api_request_args() );
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
+
+			$status_code = wp_remote_retrieve_response_code( $response );
+			if ( 200 !== $status_code ) {
+				// A 403 here means the update server withholds this package from
+				// this site (private package with no authorized domain). Surface
+				// the server message instead of failing silently.
+				if ( 403 === $status_code ) {
+					$body       = json_decode( wp_remote_retrieve_body( $response ), true );
+					$server_msg = $body['message'] ?? 'Access denied.';
+
+					// A private package marks this slug and mints a client key, so the
+					// next request presents it for approval.
+					if ( isset( $body['code'] ) && 'gu_private_package' === $body['code'] ) {
+						$this->mark_private_slug( $this->slug );
+						$this->generate_client_key();
+					}
+
+					return new WP_Error(
+						'gu_update_blocked',
+						sprintf( 'Update blocked: %s', esc_html( $server_msg ) )
+					);
+				}
+
+				return $response;
+			}
+
+			$api_data = (object) json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( null === $api_data || empty( (array) $api_data ) || property_exists( $api_data, 'error' ) ) {
+				return new WP_Error( 'non_json_api_response', 'Poorly formed JSON', $response );
+			}
+			$api_data->file = $this->file;
+			$this->api_data = $api_data;
+
+			$new_key = $this->maybe_mark_private_from_api_data();
+
+			// Don't cache when the slug was just learned to be private or a
+			// key was just minted: force the next run to re-fetch with
+			// X-GU-Lite-Key so the server can record/approve this client.
+			if ( $new_key ) {
+				delete_site_transient( $this->transient_name() );
+			} else {
+				// Set timeout for transient via filter.
+				$timeout = apply_filters( 'git_updater_lite_transient_timeout', 6 * HOUR_IN_SECONDS, $this->file );
+				set_site_transient( $this->transient_name(), $this->api_data, $timeout );
+			}
+
+			return true;
+		}
+
+		/**
+		 * Refresh API data, bypassing the cached transient.
+		 *
+		 * Hooked to `load-update-core.php` (priority 5, ahead of core's own
+		 * wp_update_plugins) so it runs after auth_redirect(). The capability
+		 * check lives here, not at the hook site, so every caller is gated.
+		 *
+		 * @return void
+		 */
+		public function force_check() {
+			$type = $this->api_data->type ?? ( str_ends_with( $this->file, '/style.css' ) ? 'theme' : 'plugin' );
+			$cap  = 'theme' === $type ? 'update_themes' : 'update_plugins';
+
+			if ( $this->fetched || ! current_user_can( $cap ) ) {
+				return;
+			}
+
+			// Bound refreshes to one per minute, matching core's own throttle
+			// for wp_update_plugins() on this hook (MINUTE_IN_SECONDS).
+			$guard = "git-updater-lite-forcecheck_{$this->file}";
+			if ( get_site_transient( $guard ) ) {
+				return;
+			}
+			set_site_transient( $guard, 1, MINUTE_IN_SECONDS );
+
+			// Overwrites the cache on success and leaves it untouched on failure.
+			$this->fetch_api_data();
+
+			if ( ! $this->hooks_loaded ) {
+				$this->load_hooks();
+			}
 		}
 
 		/**
@@ -198,6 +278,11 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 		 * @return void
 		 */
 		public function load_hooks() {
+			if ( $this->hooks_loaded ) {
+				return;
+			}
+			$this->hooks_loaded = true;
+
 			add_filter( 'upgrader_source_selection', array( __CLASS__, 'upgrader_source_selection' ), 20, 4 );
 			$type = $this->api_data->type ?? null;
 			if ( 'plugin' === $type ) {
