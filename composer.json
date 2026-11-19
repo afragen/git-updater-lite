@@ -34,7 +34,8 @@
 	},
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3",
-		"yoast/phpunit-polyfills": "*"
+		"phpunit/phpunit": "^9.0",
+		"yoast/phpunit-polyfills": "^1.1"
 	},
 	"config": {
 		"allow-plugins": {
