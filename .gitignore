@@ -10,3 +10,7 @@ tests/phpunit/cache
 tests/phpunit/coverage
 .phpunit.result.cache
 composer.lock
+.env
+.opossum-home/
+docker/
+compose.yaml

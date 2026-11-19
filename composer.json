@@ -1,7 +1,7 @@
 {
 	"name": "afragen/git-updater-lite",
 	"description": "A simple class to integrate with Git Updater for standalone plugin/theme updates.",
-	"version": "3.3.0",
+	"version": "3.4.0",
 	"type": "library",
 	"keywords": [
 		"wordpress",
@@ -34,7 +34,8 @@
 	},
 	"require-dev": {
 		"wp-coding-standards/wpcs": "^3",
-		"yoast/phpunit-polyfills": "*"
+		"phpunit/phpunit": "^9.0",
+		"yoast/phpunit-polyfills": "^1.1"
 	},
 	"config": {
 		"allow-plugins": {

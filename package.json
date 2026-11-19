@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "wp-env-macos": "^2.3.1"
+  },
+  "scripts": {
+    "env:start": "wp-env-macos up",
+    "env:stop": "wp-env-macos down",
+    "env:install": "wp-env-macos provision",
+    "test": "wp-env-macos test",
+    "test:multisite": "wp-env-macos test:multisite",
+    "test:coverage": "wp-env-macos test:coverage",
+    "test:php80": "wp-env-macos test:php80"
+  }
+}
