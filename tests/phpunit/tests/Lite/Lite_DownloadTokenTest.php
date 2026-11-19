@@ -62,8 +62,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -105,7 +106,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertNotNull( $captured_args, 'Token request was not made.' );
 		$this->assertArrayHasKey( 'headers', $captured_args );
@@ -127,8 +128,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -149,7 +151,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_token_fetch_failed', $result->get_error_code() );
@@ -167,8 +169,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -189,7 +192,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_token_fetch_failed', $result->get_error_code() );
@@ -206,8 +209,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -228,7 +232,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'gu_no_fresh_url', $result->get_error_code() );
@@ -245,8 +249,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -280,7 +285,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'download_failed', $result->get_error_code() );
@@ -297,8 +302,9 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			$lite,
 			'api_data',
 			(object) array(
-				'type' => 'plugin',
-				'slug' => 'my-plugin',
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => 'https://my-plugin.com/download-token/my-plugin',
 			)
 		);
 		$lite->load_hooks();
@@ -339,13 +345,141 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 			3
 		);
 
-		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/abc123', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+		$result = apply_filters( 'upgrader_pre_download', false, 'https://my-plugin.com/download-token/my-plugin', new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
 
 		$this->assertIsString( $result );
 		$this->assertFileExists( $result );
 
 		// Clean up.
 		wp_delete_file( $result );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
+	 * Tests that an instance ignores another Lite instance's token package.
+	 */
+	public function test_does_not_handle_another_instances_token_package() {
+		update_site_option( 'git_updater_lite_client_key', 'test-client-key' );
+		update_site_option( 'git_updater_lite_private_slugs', array( 'my-plugin' ) );
+
+		$token_url = 'https://my-plugin.com/download-token/my-plugin';
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => $token_url,
+			)
+		);
+		$lite->load_hooks();
+
+		$other = new \Fragen\Git_Updater\Lite( $this->test_files['plugin_no_server'] );
+		$this->set_property_value(
+			$other,
+			'api_data',
+			(object) array(
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin-no-server',
+				'download_link' => 'https://other.test/download-token/my-plugin-no-server',
+			)
+		);
+		$other->load_hooks();
+
+		$fresh_url     = 'https://downloads.example.org/fresh-package.zip';
+		$requests      = array();
+		$captured_args = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$requests, &$captured_args, $fresh_url ) {
+				if ( str_contains( $url, 'download-token/' ) ) {
+					$requests[] = $url;
+					if ( empty( $parsed_args['headers']['X-GU-Lite-Key'] ) ) {
+						return array(
+							'body'     => wp_json_encode(
+								array(
+									'code'    => 'gu_unauthorized_domain',
+									'message' => 'Domain not authorized for this package.',
+								)
+							),
+							'response' => array( 'code' => 403 ),
+						);
+					}
+					$captured_args = $parsed_args;
+					return array(
+						'body'     => wp_json_encode( array( 'download_link' => $fresh_url ) ),
+						'response' => array( 'code' => 200 ),
+					);
+				}
+				if ( str_contains( $url, $fresh_url ) ) {
+					$tmp = tempnam( sys_get_temp_dir(), 'gu_test_' );
+					file_put_contents( $tmp, 'test content' );
+					return array(
+						'body'     => $tmp,
+						'response' => array( 'code' => 200 ),
+					);
+				}
+				return $response;
+			},
+			10,
+			3
+		);
+
+		$result = apply_filters( 'upgrader_pre_download', false, $token_url, new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+
+		$this->assertIsString( $result );
+		$this->assertFileExists( $result );
+		$this->assertCount( 1, $requests, 'A non-owning instance made a token request.' );
+		$this->assertNotNull( $captured_args, 'Owner token request was not made.' );
+		$this->assertSame( 'test-client-key', $captured_args['headers']['X-GU-Lite-Key'] );
+
+		wp_delete_file( $result );
+		remove_all_filters( 'pre_http_request' );
+		delete_site_option( 'git_updater_lite_client_key' );
+		delete_site_option( 'git_updater_lite_private_slugs' );
+	}
+
+	/**
+	 * Tests that a token package already resolved by another callback is left alone.
+	 */
+	public function test_returns_existing_reply_for_token_package() {
+		$token_url = 'https://my-plugin.com/download-token/my-plugin';
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => $token_url,
+			)
+		);
+		$lite->load_hooks();
+
+		$requests = 0;
+
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$requests ) {
+				if ( str_contains( $url, 'download-token/' ) ) {
+					$requests++;
+				}
+				return $response;
+			},
+			10,
+			3
+		);
+
+		$reply  = '/tmp/existing-package.zip';
+		$result = apply_filters( 'upgrader_pre_download', $reply, $token_url, new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+
+		$this->assertSame( $reply, $result );
+		$this->assertSame( 0, $requests );
 
 		remove_all_filters( 'pre_http_request' );
 	}

@@ -301,9 +301,24 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 			add_filter(
 				'upgrader_pre_download',
 				function ( $reply, $package, $upgrader ) {
-					if ( ! str_contains( $package, 'download-token/' ) ) {
-						// Proceed normally for non-git-updater packages or direct URLs.
-						add_filter( 'http_request_args', array( $this, 'add_auth_header' ), 20, 2 );
+					// Another Lite instance (or plugin) already resolved this package.
+					if ( false !== $reply ) {
+						return $reply;
+					}
+
+					// Only handle this instance's own token URL. Multiple active Lite
+					// consumers each add this filter; a non-owning instance would request
+					// the token without a key and surface a 403 WP_Error that replaces the
+					// owner's downloaded file.
+					$download_link = is_object( $this->api_data )
+						? (string) ( $this->api_data->download_link ?? '' )
+						: '';
+
+					if ( '' === $download_link || $package !== $download_link ) {
+						if ( ! str_contains( $package, 'download-token/' ) ) {
+							// Proceed normally for non-git-updater packages or direct URLs.
+							add_filter( 'http_request_args', array( $this, 'add_auth_header' ), 20, 2 );
+						}
 						return false;
 					}
 
