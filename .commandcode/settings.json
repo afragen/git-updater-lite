@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(npx wp-env-macos test)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
