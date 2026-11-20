@@ -324,7 +324,11 @@ if ( ! class_exists( 'Fragen\\Git_Updater\\Lite' ) ) {
 
 					$args = $this->get_api_request_args();
 
-					$response    = wp_remote_get( $package, $args );
+					// A page cache in front of the update server would otherwise
+					// replay the cached token response, whose signed URL has already
+					// expired by the time it is redeemed. Page caches key on the
+					// query string, so a unique argument guarantees a fresh request.
+					$response    = wp_remote_get( add_query_arg( '_', time(), $package ), $args );
 					$status_code = wp_remote_retrieve_response_code( $response );
 
 					if ( is_wp_error( $response ) || 200 !== $status_code ) {

@@ -483,4 +483,76 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 
 		remove_all_filters( 'pre_http_request' );
 	}
+
+	/**
+	 * Tests that the token request carries a cache-busting query argument.
+	 *
+	 * A page cache keyed on the query string would otherwise replay a cached
+	 * token response whose signed URL has already expired, so the request must
+	 * never look identical to a previous one.
+	 */
+	public function test_token_request_is_not_page_cacheable() {
+		$token_url = 'https://my-plugin.com/download-token/my-plugin';
+
+		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
+		$this->set_property_value(
+			$lite,
+			'api_data',
+			(object) array(
+				'type'          => 'plugin',
+				'slug'          => 'my-plugin',
+				'download_link' => $token_url,
+			)
+		);
+		$lite->load_hooks();
+
+		$captured_url = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) use ( &$captured_url ) {
+				if ( str_contains( $url, 'download-token/' ) ) {
+					$captured_url = $url;
+					return array(
+						'body'     => wp_json_encode( array( 'download_link' => 'https://example.com/fresh.zip' ) ),
+						'response' => array( 'code' => 200 ),
+					);
+				}
+				return $response;
+			},
+			10,
+			3
+		);
+
+		// Mock download_url to return a temp file.
+		add_filter(
+			'pre_http_request',
+			function ( $response, $parsed_args, $url ) {
+				if ( str_contains( $url, 'fresh.zip' ) ) {
+					$tmp = tempnam( sys_get_temp_dir(), 'gu_test_' );
+					file_put_contents( $tmp, 'test content' );
+					return array(
+						'body'     => $tmp,
+						'response' => array( 'code' => 200 ),
+					);
+				}
+				return $response;
+			},
+			20,
+			3
+		);
+
+		$result = apply_filters( 'upgrader_pre_download', false, $token_url, new Plugin_Upgrader( new Plugin_Upgrader_Skin() ) );
+
+		$this->assertNotNull( $captured_url, 'Token request was not made.' );
+
+		$query = array();
+		parse_str( (string) wp_parse_url( $captured_url, PHP_URL_QUERY ), $query );
+
+		$this->assertArrayHasKey( '_', $query, 'Token request must carry a cache-busting query arg.' );
+		$this->assertMatchesRegularExpression( '/^\d+$/', (string) $query['_'] );
+
+		wp_delete_file( $result );
+		remove_all_filters( 'pre_http_request' );
+	}
 }
