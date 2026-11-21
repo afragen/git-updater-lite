@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ["7.4", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        php-versions: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5", "8.6"]
 
     name: PHP ${{ matrix.php-versions }} Test on ubuntu-latest
     steps:
@@ -62,3 +62,18 @@ jobs:
         run: |
           echo "define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', '$HOME/.composer/vendor/yoast/phpunit-polyfills');" >> /tmp/wordpress-tests-lib/wp-tests-config.php
           phpunit --config=phpunit.xml.dist
+
+  deprecations:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ["8.5", "8.6"]
+    name: PHP ${{ matrix.php-versions }} deprecation check
+    steps:
+      - uses: actions/checkout@master
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+      - run: bash bin/check-php-deprecations.sh

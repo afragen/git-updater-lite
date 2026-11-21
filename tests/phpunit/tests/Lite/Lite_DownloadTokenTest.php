@@ -20,7 +20,7 @@ class Lite_DownloadTokenTest extends GitUpdater_UnitTestCase {
 		$lite = new \Fragen\Git_Updater\Lite( $this->test_files['plugin'] );
 
 		$method = new ReflectionMethod( $lite, 'get_client_key' );
-		$method->setAccessible( true );
+		PHP_VERSION_ID < 80100 && $method->setAccessible( true );
 
 		$this->assertSame( '', $method->invoke( $lite ) );
 
